@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Install Chisel
         run: |
-          curl -L https://github.com/jpillora/chisel/releases/latest/download/chisel_$(uname -s)_$(uname -m).gz | gunzip -c > /usr/local/bin/chisel
+          curl -L https://github.com/jpillora/chisel/releases/download/v1.7.0/chisel_linux_amd64.gz | gunzip -c > /usr/local/bin/chisel
           chmod +x /usr/local/bin/chisel
 
       - name: Run Chisel SOCKS5 Proxy
