@@ -1,0 +1,22 @@
+name: SOCKS5 Proxy
+
+on:
+  workflow_dispatch:
+    inputs:
+      time-duration:
+        description: Time to run the proxy
+        required: true
+        default: 10m
+
+jobs:
+  socks5-proxy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Chisel
+        run: |
+          curl -L https://github.com/jpillora/chisel/releases/latest/download/chisel_$(uname -s)_$(uname -m).gz | gunzip -c > /usr/local/bin/chisel
+          chmod +x /usr/local/bin/chisel
+
+      - name: Run Chisel SOCKS5 Proxy
+        run: |
+          timeout "${{ github.event.inputs.time-duration }}" chisel server --socks5
