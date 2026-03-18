@@ -18,12 +18,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y curl
 
-      - name: Download Chisel
+      - name: Copy Chisel .deb Package
         run: |
-          curl -L https://github.com/jpillora/chisel/releases/latest/download/chisel_linux_amd64.gz -o chisel.gz
-          gunzip chisel.gz
-          chmod +x chisel
-          sudo mv chisel /usr/local/bin/
+          cp chisel_1.11.5_linux_386.deb chisel.deb
+          sudo dpkg -i chisel.deb
+
+      - name: Copy Checksums
+        run: |
+          cp Proxy/chisel_1.11.5_checksums.txt checksums.txt
+
+      - name: Verify Chisel Binary
+        run: |
+          echo "$(grep chisel_1.11.5_linux_386.deb checksums.txt)  chisel.deb" | sha256sum -c -
 
       - name: Start Chisel Server
         run: |
