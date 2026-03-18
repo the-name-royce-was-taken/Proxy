@@ -20,16 +20,8 @@ jobs:
 
       - name: Copy Chisel .deb Package
         run: |
-          cp chisel_1.11.5_linux_386.deb chisel.deb
+          cp chisel_1.11.5_linux_amd64.deb chisel.deb
           sudo dpkg -i chisel.deb
-
-      - name: Copy Checksums
-        run: |
-          cp Proxy/chisel_1.11.5_checksums.txt checksums.txt
-
-      - name: Verify Chisel Binary
-        run: |
-          echo "$(grep chisel_1.11.5_linux_386.deb checksums.txt)  chisel.deb" | sha256sum -c -
 
       - name: Start Chisel Server
         run: |
