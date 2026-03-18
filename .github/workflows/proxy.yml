@@ -1,32 +1,38 @@
-name: Chisel Proxy Setup
+name: Host Chisel SOCKS5 Proxy
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      time-duration:
+        description: Time to run chisel
+        required: true
+        default: 10m
 
 jobs:
-  build:
+  socks5-proxy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install Dependencies
+      - name: Install Chisel
         run: |
-          sudo apt-get update
-          sudo apt-get install -y curl
+          version="1.7.6"
+          curl -L "https://github.com/jpillora/chisel/releases/latest/download/chisel_${version}_linux_amd64.gz" | gunzip -c > chisel
+          chmod +x chisel
+          sudo mv chisel /usr/local/bin/
 
-      - name: Copy Chisel .deb Package
-        run: |
-          cp chisel_1.11.5_linux_amd64.deb chisel.deb
-          sudo dpkg -i chisel.deb
+      - name: Setup Cloudflare Tunnel client
+        uses: AnimMouse/setup-cloudflared@v1
+        with:
+          cloudflare_tunnel_certificate: ${{ secrets.CLOUDFLARE_TUNNEL_CERTIFICATE }}
+          cloudflare_tunnel_credential: ${{ secrets.CLOUDFLARE_TUNNEL_CREDENTIAL }}
+          cloudflare_tunnel_configuration: ${{ secrets.CLOUDFLARE_TUNNEL_CONFIGURATION }}
+          cloudflare_tunnel_id: ${{ secrets.CLOUDFLARE_TUNNEL_ID }}
 
-      - name: Start Chisel Server
-        run: |
-          chisel server --reverse --port 8080 &
+      - name: Run Chisel server
+        run: timeout "${{ github.event.inputs.time-duration }}" chisel server --socks5 --reverse || true
 
-      - name: Run Chisel Client
-        run: |
-          chisel client --proxy socks5://localhost:1080 10.0.0.1:9090 R:socks
+      - name: Shutdown and view logs of Cloudflare Tunnel
+        if: always()
+        uses: AnimMouse/setup-cloudflared/shutdown@v1
